@@ -1,31 +1,72 @@
 <template>
   <div class="login">
     <!-- 这里只能有一个根节点 -->
-    <el-form ref="loginForm" :model="loginForm" class="container">
+    <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="container">
       <el-form-item>
         <div class="avatar">
           <img src="../assets/avatar.jpg" alt="">
         </div>
       </el-form-item>
-      <el-form-item>
-        <el-input v-model="loginForm.userName" prefix-icon="myicon myicon-user"></el-input>
+      <el-form-item prop="userName">
+        <el-input v-model="loginForm.userName" prefix-icon="myicon myicon-user" @keyup.enter.native="login('loginForm')" autofocus></el-input>
       </el-form-item>
-      <el-form-item>
-        <el-input v-model="loginForm.userPwd" prefix-icon="myicon myicon-key"></el-input>
+      <el-form-item prop="userPwd">
+        <el-input v-model="loginForm.userPwd" prefix-icon="myicon myicon-key" @keyup.enter.native="login('loginForm')"></el-input>
       </el-form-item>
-      <el-button type="primary" class="login-btn">确定</el-button>
+      <el-button type="primary" class="login-btn" @click="login('loginForm')">登录</el-button>
     </el-form>
   </div>
 </template>
 
 <script>
+import {checkLogin} from '@/api'
 export default {
   data () {
     return {
       loginForm: {
         userName: '',
         userPwd: ''
+      },
+      loginRules: {
+        userName: [
+          { required: true, message: '请输入您的昵称', trigger: 'blur' },
+          { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
+        ],
+        userPwd: [
+          { required: true, message: '请输入您的密码', trigger: 'blur' },
+          { min: 6, max: 12, message: '长度在 6 到 12 个字符', trigger: 'blur' }
+        ]
       }
+    }
+  },
+  methods: {
+    login (loginForm) {
+      this.$refs[loginForm].validate((result) => {
+        if (result) {
+          checkLogin({username: this.loginForm.userName, password: this.loginForm.userPwd})
+            .then(res => {
+              // console.log(123)
+              if (res.meta.status === 200) {
+                console.log(res.meta)
+                this.$router.push({name: 'home'})
+              } else {
+                this.$message.error(res.meta.msg)
+              }
+            })
+        } else {
+          return false
+        }
+      })
+      // checkLogin({username: this.loginForm.userName, password: this.loginForm.userPwd})
+      //   .then(res => {
+      //     // console.log(123)
+      //     if (res.meta.status === 200) {
+      //       console.log(res.meta)
+      //       this.$router.push({name: 'home'})
+      //     } else {
+      //       this.$message.error(res.meta.msg)
+      //     }
+      //   })
     }
   }
 }
