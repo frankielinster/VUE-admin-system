@@ -41,13 +41,15 @@ export default {
   },
   methods: {
     login (loginForm) {
+      // validate()是一个校验函数, 它里面跟一个带参数的函数作为参数, 这个函数的参数是一个布尔值, 为true表示通过校验
       this.$refs[loginForm].validate((result) => {
         if (result) {
           checkLogin({username: this.loginForm.userName, password: this.loginForm.userPwd})
             .then(res => {
               // console.log(123)
               if (res.meta.status === 200) {
-                console.log(res.meta)
+                console.log(res)
+                localStorage.setItem('adminToken', res.data.token)
                 this.$router.push({name: 'home'})
               } else {
                 this.$message.error(res.meta.msg)
