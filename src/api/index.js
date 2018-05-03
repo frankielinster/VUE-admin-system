@@ -48,5 +48,17 @@ export const changeUserState = obj => axios.put(`users/${obj.uid}/state/${obj.ty
 export const addUser = obj => axios.post('users', obj).then(res => res.data)
 
 // 编辑用户
-export const editUser = obj => axios.put(`users/${obj.id}`).then(res => res.data)
+export const editUser = obj => axios.put(`users/${obj.id}`, {email: obj.email, mobile: obj.mobile}).then(res => res.data)
 
+// 删除用户
+export const delUser = id => axios.delete(`users/${id}`).then(res => res.data)
+
+// 获取角色列表
+export const getRolesList = () => axios.get('roles').then(res => res.data)
+
+// 提交角色编辑列表
+export const grantUser = obj => axios.put(`users/${obj.id}/role`, {rid: obj.rid}).then(res => res.data)
+
+// Rights.vue
+// 获取权限列表
+export const getRightList = obj => axios.get(`rights/${obj.type}`).then(res => res.data)
