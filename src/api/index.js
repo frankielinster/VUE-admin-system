@@ -8,7 +8,7 @@ axios.defaults.baseURL = URL
 
 // 定义一个请求拦截器, 用来拦截所有的请求, 里面的config参数是一个请求对象, 里面有很多属性
 axios.interceptors.request.use(function (config) {
-  console.log(config)
+  // console.log(config)
   // 先判断, 如果本地存在adminToken这个token, 我们就将token放到Request Headers中
   var token = localStorage.getItem('adminToken')
   if (token) {
@@ -39,4 +39,14 @@ axios.interceptors.request.use(function (config) {
 export const checkLogin = params => axios.post('login', params).then(res => res.data)
 
 // 定义获取用户信息界面请求
-export const getUserList = obj => axios.get('users', {params: obj}).then(res => res.data)
+export const getUserList = obj => axios.get('users', { params: obj }).then(res => res.data)
+
+// 改变用户状态
+export const changeUserState = obj => axios.put(`users/${obj.uid}/state/${obj.type}`).then(res => res.data)
+
+// 添加用户
+export const addUser = obj => axios.post('users', obj).then(res => res.data)
+
+// 编辑用户
+export const editUser = obj => axios.put(`users/${obj.id}`).then(res => res.data)
+

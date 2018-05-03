@@ -11,7 +11,7 @@
         <el-input v-model="loginForm.userName" prefix-icon="myicon myicon-user" @keyup.enter.native="login('loginForm')" autofocus></el-input>
       </el-form-item>
       <el-form-item prop="userPwd">
-        <el-input v-model="loginForm.userPwd" prefix-icon="myicon myicon-key" @keyup.enter.native="login('loginForm')"></el-input>
+        <el-input v-model="loginForm.userPwd" prefix-icon="myicon myicon-key" type="password" @keyup.enter.native="login('loginForm')"></el-input>
       </el-form-item>
       <el-button type="primary" class="login-btn" @click="login('loginForm')">登录</el-button>
     </el-form>
@@ -48,9 +48,12 @@ export default {
             .then(res => {
               // console.log(123)
               if (res.meta.status === 200) {
+                // 跳转到首页, 保存服务器返回的token
                 console.log(res)
                 localStorage.setItem('adminToken', res.data.token)
                 this.$router.push({name: 'home'})
+                // 将username存储到vuex的state中
+                this.$store.commit('setUserName', res.data.username)
               } else {
                 this.$message.error(res.meta.msg)
               }

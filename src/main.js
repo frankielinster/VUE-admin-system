@@ -3,6 +3,7 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
+import store from '@/store'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import '@/styles/index.scss'
@@ -16,8 +17,8 @@ Vue.use(ElementUI)
 router.beforeEach((to, from, next) => {
   let token = localStorage.getItem('adminToken')
   if (token) {
-    console.log(to)
-    console.log(from)
+    // console.log(to)
+    // console.log(from)
     // 如果登录了就继续执行下一步
     next()
   } else {
@@ -37,6 +38,7 @@ router.beforeEach((to, from, next) => {
 new Vue({
   el: '#app',
   router,
+  store,
   components: { App },
   template: '<App/>'
 })

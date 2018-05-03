@@ -4,37 +4,33 @@
       <el-aside width="auto">
         <div class="logo"></div>
         <el-menu
-      default-active="2"
-      :collapse="isCollapse"
-      class="el-menu-admin"
-      background-color="#F9F9F9"
-      active-text-color="#409EFF"
-      @open="handleOpen"
-      @close="handleClose">
-      <el-submenu index="1">
-        <template slot="title">
-          <i class="el-icon-location"></i>
-          <span>用户管理</span>
-        </template>
-        <el-menu-item-group>
-          <el-menu-item index="2">
-            <i class="el-icon-menu"></i>
-            <span slot="title">用户列表</span>
-          </el-menu-item>
-          <el-menu-item index="2">
-            <i class="el-icon-menu"></i>
-            <span slot="title">用户列表</span>
-          </el-menu-item>
-        </el-menu-item-group>
-      </el-submenu>
-    </el-menu>
+          default-active="2"
+          :collapse="isCollapse"
+          class="el-menu-admin"
+          background-color="#F9F9F9"
+          active-text-color="#409EFF"
+          :router="true"
+          @open="handleOpen"
+          @close="handleClose">
+          <el-submenu index="1">
+            <template slot="title">
+              <i class="el-icon-location"></i>
+              <span>用户管理</span>
+            </template>
+            <el-menu-item index="/user">
+              <i class="el-icon-menu"></i>
+              <span slot="title">用户列表</span>
+            </el-menu-item>
+          </el-submenu>
+        </el-menu>
       </el-aside>
+
       <el-container>
         <el-header>
           <i class="myicon myicon-menu toggle-btn" @click="isCollapse = !isCollapse"></i>
           <div class="system-title">电商后台管理系统</div>
           <div>
-            <span class="welcome">你好,Frankie</span>
+            <span class="welcome">你好,{{$store.getters.gettersName}}</span>
             <el-button type="warning" round @click="logOut">退出</el-button>
           </div>
         </el-header>
@@ -72,10 +68,6 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        // this.$message({
-        //   type: 'success',
-        //   message: '删除成功!'
-        // })
         localStorage.removeItem('adminToken')
         this.$router.push({name: 'login'})
       }).catch(() => {
@@ -129,7 +121,7 @@ export default {
     font-size: 28px;
     color: white;
   }
-  .welcome, {
+  .welcome {
     color: white;
   }
 }
