@@ -10,16 +10,38 @@
       </el-col>
     </el-row>
 
-    <el-button type="primary" plain>添加用户</el-button>
+    <el-button type="primary" plain>添加角色</el-button>
 
     <el-table
+    v-loading="loading"
     border
     class="mt-15 mb-15"
     :data="rolesList"
     style="width: 100%">
       <el-table-column type="expand">
         <template slot-scope="scope">
-          Here to add something
+
+          <el-row v-for="(firstItem,index) in scope.row.children" :key="index">
+            <el-col :span="4">
+              <el-tag closable>{{firstItem.authName}}</el-tag>
+              <i class="el-icon-caret-right" v-if="firstItem.authName.length !== 0"></i>
+            </el-col>
+            <el-col :span="20">
+              <el-row v-for="(secondItem,index) in firstItem.children" :key="index">
+                <el-col :span="4">
+                  <el-tag closable type= 'success'>{{secondItem.authName}}</el-tag>
+                  <i class="el-icon-caret-right" v-if="secondItem.authName.length !== 0"></i>
+                </el-col>
+                <el-col :span="20">
+                  <el-tag closable type= 'warning'  v-for="(thirdItem,index) in secondItem.children" :key="index">{{thirdItem.authName}}</el-tag>
+                </el-col>
+              </el-row>
+            </el-col>
+          </el-row>
+          <el-row v-if="scope.row.children.length === 0">
+            <el-col :span="24">该角色未分配功能, 请前往分配</el-col>
+          </el-row>
+
         </template>
       </el-table-column>
       <el-table-column
@@ -54,6 +76,7 @@ import { getRolesList } from '@/api'
 export default {
   data () {
     return {
+      loading: true,
       rolesList: []
     }
   },
@@ -63,10 +86,23 @@ export default {
   methods: {
     initList () {
       getRolesList().then(res => {
-        // console.log(res)
+        console.log(res)
+        this.loading = false
         this.rolesList = res.data
       })
     }
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.roles {
+  .el-tag {
+    margin: 5px 5px 5px 0;
+  }
+  .tree-container {
+    height: 300px;
+    overflow: auto;
+  }
+}
+</style>

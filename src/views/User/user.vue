@@ -11,6 +11,7 @@
     <el-button type="primary" @click="addDialogFormVisible=!addDialogFormVisible">添加用户</el-button>
 
     <el-table
+      v-loading="loading"
       class="mt-15 mb-15"
       :data="userList"
       border
@@ -51,6 +52,8 @@
         </template>
       </el-table-column>
     </el-table>
+
+    <!-- 分页器 -->
     <el-pagination
       class="page"
       @size-change="handleSizeChange"
@@ -128,6 +131,7 @@ import {getUserList, changeUserState, addUser, editUser, delUser, getRolesList, 
 export default {
   data () {
     return {
+      loading: true,
       searchVal: '',
       userList: [],
       roleList: [], // 保存角色列表
@@ -186,6 +190,7 @@ export default {
       getUserList({query: this.searchVal, pagenum: this.currentPage, pagesize: this.pageSize}).then(res => {
         // console.log(res.data)
         if (res.meta.status === 200) {
+          this.loading = false
           this.totalNum = res.data.total
           this.userList = res.data.users
           this.searchVal = ''
