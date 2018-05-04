@@ -209,6 +209,7 @@ export default {
     },
     selectRole (row) {
       // console.log(row)
+      this.currentRole = row
     },
     editTree (row) {
       this.$alert('<strong>这是 <i>HTML</i> 片段</strong>', 'HTML 片段', {

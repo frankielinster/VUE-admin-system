@@ -72,3 +72,7 @@ export const editRole = obj => axios.put(`roles/${obj.id}`, obj).then(res => res
 
 // 删除角色
 export const delRole = id => axios.delete(`roles/${id}`).then(res => res.data)
+
+// productList.vue
+// 获取商品数据列表
+export const getProductCategories = obj => axios.get('goods', {params: obj}).then(res => res.data)
