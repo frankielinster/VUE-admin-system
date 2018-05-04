@@ -62,3 +62,13 @@ export const grantUser = obj => axios.put(`users/${obj.id}/role`, {rid: obj.rid}
 // Rights.vue
 // 获取权限列表
 export const getRightList = obj => axios.get(`rights/${obj.type}`).then(res => res.data)
+
+// Roles.vue
+// 添加角色
+export const addRole = obj => axios.post('roles', obj).then(res => res.data)
+
+// 编辑角色
+export const editRole = obj => axios.put(`roles/${obj.id}`, obj).then(res => res.data)
+
+// 删除角色
+export const delRole = id => axios.delete(`roles/${id}`).then(res => res.data)
