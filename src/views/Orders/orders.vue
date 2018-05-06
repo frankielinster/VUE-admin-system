@@ -1,11 +1,11 @@
 <template>
-  <div class="productList">
+  <div class="orders">
     <el-row>
       <el-col :span="24">
         <el-breadcrumb separator="/">
           <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-          <el-breadcrumb-item>商品管理</el-breadcrumb-item>
-          <el-breadcrumb-item>商品列表</el-breadcrumb-item>
+          <el-breadcrumb-item>订单管理</el-breadcrumb-item>
+          <el-breadcrumb-item>订单列表</el-breadcrumb-item>
         </el-breadcrumb>
       </el-col>
     </el-row>
@@ -14,49 +14,53 @@
     <el-input placeholder="请输入搜索内容" v-model="searchVal" class="search-input" @keydown.enter.native="initList">
       <el-button slot="append" icon="el-icon-search" @click="initList"></el-button>
     </el-input>
-    <el-button type="primary" plain @click="toAddProduct">添加商品</el-button>
+    <el-button type="primary" plain>测试订单</el-button>
 
     <!-- 表单 -->
     <el-table
       border
       v-loading="loading"
       class="mt-15 mb-15"
-      :data="productsData"
+      :data="ordersData"
       style="width: 100%">
       <el-table-column
-        :width="tabWidths[0]"
         type="index"
-        label="编号">
+        label="编号"
+        :width="tabWidths[0]">
       </el-table-column>
       <el-table-column
-        :width="tabWidths[1]"
-        prop="goods_name"
-        label="商品名称">
+        prop="order_number"
+        label="订单编号"
+        :width="tabWidths[1]">
       </el-table-column>
       <el-table-column
-        :width="tabWidths[2]"
-        prop="goods_price"
-        label="商品价格">
+        prop="order_price"
+        label="订单价格"
+        :width="tabWidths[2]">
       </el-table-column>
       <el-table-column
-        :width="tabWidths[3]"
-        prop="goods_state"
-        label="商品状态">
+        prop="order_id"
+        label="下单用户"
+        :width="tabWidths[3]">
+      </el-table-column>
+      <el-table-column
+        prop="pay_status"
+        label="是否付款"
+        :width="tabWidths[4]">
         <template slot-scope="scope">
-          {{scope.row.goods_state | filterState}}
+          {{scope.row.pay_status | filterPay}}
         </template>
       </el-table-column>
       <el-table-column
-        :width="tabWidths[4]"
-        prop="goods_weight"
-        label="商品重量">
+        prop="is_send"
+        label="是否发货"
+        :width="tabWidths[5]">
       </el-table-column>
       <el-table-column
-        :width="tabWidths[5]"
-        prop="add_time"
-        label="创建时间">
+        prop="create_time"
+        label="下单时间">
         <template slot-scope="scope">
-          {{scope.row.add_time | filterTime("-")}}
+          {{scope.row.create_time | filterTime('-')}}
         </template>
       </el-table-column>
       <el-table-column label="操作">
@@ -76,7 +80,7 @@
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
       :current-page="currentPage"
-      :page-sizes="[10, 50, 100, 200]"
+      :page-sizes="[10, 20, 30, 40]"
       :page-size="pageSize"
       layout="total, sizes, prev, pager, next, jumper"
       :total="totalNum">
@@ -85,17 +89,17 @@
 </template>
 
 <script>
-import {getProductCategories} from '@/api'
+import {getOrderList} from '@/api'
 export default {
   data () {
     return {
-      searchVal: '',
-      productsData: [],
       loading: true,
-      tabWidths: [50, 350, 80, 80, 100, 130, 260],
+      searchVal: '',
+      ordersData: [],
       currentPage: 1,
       pageSize: 10,
-      totalNum: 0
+      totalNum: 0,
+      tabWidths: [50, 260, 80, 100, 80, 80, 120, 150]
     }
   },
   created () {
@@ -113,30 +117,23 @@ export default {
       this.initList()
     },
     initList () {
-      getProductCategories({query: this.searchVal, pagenum: this.currentPage, pagesize: this.pageSize}).then(res => {
+      console.log(this.searchVal)
+      getOrderList({query: this.searchVal, pagenum: this.currentPage, pagesize: this.pageSize}).then(res => {
+        console.log(res)
         if (res.meta.status === 200) {
-          console.log(res)
           this.loading = false
-          this.productsData = res.data.goods
+          this.ordersData = res.data.goods
           this.totalNum = res.data.total
-        } else {
-          this.$message.error(res.meta.msg)
         }
       })
-    },
-    toAddProduct () {
-      this.$router.push({path: 'addproduct'})
     }
   },
   filters: {
-    filterState (state) {
-      // console.log(state)
-      if (state === 0) {
-        return '未通过'
-      } else if (state === 1) {
-        return '审核中'
+    filterPay (status) {
+      if (status === '0') {
+        return '已付款'
       } else {
-        return '已审核'
+        return '未付款'
       }
     },
     filterTime (time, seprator) {
@@ -152,7 +149,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.productList {
+.orders {
   .search-input {
     width: 300px;
   }

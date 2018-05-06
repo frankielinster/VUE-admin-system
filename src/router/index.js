@@ -9,6 +9,8 @@ import Roles from '@/views/Auth/Roles.vue'
 import ProductCategory from '@/views/products/productCategory.vue'
 import ProductList from '@/views/products/productList.vue'
 import SortingParams from '@/views/products/sortingParams.vue'
+import AddProduct from '@/views/products/addProduct.vue'
+import Orders from '@/views/Orders/orders.vue'
 
 Vue.use(Router)
 
@@ -28,7 +30,7 @@ export default new Router({
         },
         {
           name: 'user',
-          path: 'user',
+          path: 'users',
           component: User
         },
         {
@@ -43,18 +45,28 @@ export default new Router({
         },
         {
           name: 'productcategory',
-          path: 'productcategory',
+          path: 'categories',
           component: ProductCategory
         },
         {
           name: 'productlist',
-          path: 'productlist',
+          path: 'goods',
           component: ProductList
         },
         {
           name: 'sortingparams',
-          path: 'sortingparams',
+          path: 'params',
           component: SortingParams
+        },
+        {
+          name: 'addproduct',
+          path: 'addproduct',
+          component: AddProduct
+        },
+        {
+          name: 'orders',
+          path: 'orders',
+          component: Orders
         }
       ]
     }

@@ -13,7 +13,6 @@
     <el-button type="primary" plain @click="addDialogFormVisible = !addDialogFormVisible">添加角色</el-button>
 
     <el-table
-    @expand-change="selectRole"
     v-loading="loading"
     border
     class="mt-15 mb-15"
@@ -24,17 +23,17 @@
 
           <el-row v-for="(firstItem,index) in scope.row.children" :key="index">
             <el-col :span="3">
-              <el-tag closable>{{firstItem.authName}}</el-tag>
+              <el-tag closable @close="delCurrentRight(scope.row, firstItem.id)">{{firstItem.authName}}</el-tag>
               <i class="el-icon-caret-right" v-if="firstItem.authName.length !== 0"></i>
             </el-col>
             <el-col :span="21">
               <el-row class="underLine" v-for="(secondItem,index) in firstItem.children" :key="index">
                 <el-col :span="4">
-                  <el-tag closable type= 'success'>{{secondItem.authName}}</el-tag>
+                  <el-tag closable type= 'success' @close="delCurrentRight(scope.row, secondItem.id)">{{secondItem.authName}}</el-tag>
                   <i class="el-icon-caret-right" v-if="secondItem.authName.length !== 0"></i>
                 </el-col>
                 <el-col :span="20">
-                  <el-tag closable type= 'warning'  v-for="(thirdItem,index) in secondItem.children" :key="index">{{thirdItem.authName}}</el-tag>
+                  <el-tag closable type= 'warning'  v-for="(thirdItem,index) in secondItem.children" :key="index" @close="delCurrentRight(scope.row, thirdItem.id)">{{thirdItem.authName}}</el-tag>
                 </el-col>
               </el-row>
             </el-col>
@@ -101,20 +100,41 @@
         <el-button type="primary" @click="submitEditRole('editRoleForm')">确 定</el-button>
       </div>
     </el-dialog>
+
+    <!-- 编辑授权角色对话框 -->
+    <el-dialog title="授权角色"       :visible.sync="roleDialogFormVisible">
+      <div class="tree">
+        <el-tree
+          :data="treeData"
+          show-checkbox
+          ref="tree"
+          default-expand-all
+          highlight-current
+          node-key="id"
+          :default-checked-keys='selectedRights'
+          :props="defaultProps">
+        </el-tree>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="roleDialogFormVisible=false">取 消</el-button>
+        <el-button type="primary" @click="submitTreeData">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import {getRolesList, addRole, editRole, delRole} from '@/api'
+import {getRolesList, addRole, editRole, delRole, delRoleRight, getRightList, grant} from '@/api'
 export default {
   data () {
     return {
       loading: true,
       rolesList: [],
       formLabelWidth: '80px',
-      currentRole: '',
+      // currentRole: '',
       addDialogFormVisible: false, // 添加角色对话框显示与隐藏
       editDialogFormVisible: false, // 添加角色对话框显示与隐藏
+      roleDialogFormVisible: false, // 编辑授权角色对话框显示与隐藏
       // 添加的表单对象
       addForm: {
         roleName: '',
@@ -124,6 +144,13 @@ export default {
         roleName: '',
         roleDesc: '',
         id: ''
+      },
+      treeData: [],
+      selectedRights: [],
+      currentRole: {},
+      defaultProps: {
+        children: 'children',
+        label: 'authName'
       },
       rules: {
         roleName: [
@@ -207,13 +234,62 @@ export default {
         })
       })
     },
-    selectRole (row) {
-      // console.log(row)
-      this.currentRole = row
+    delCurrentRight (row, rightId) {
+      // console.log(row, rightId)
+      delRoleRight({roleId: row.id, rightId: rightId}).then(res => {
+        if (res.meta.status === 200) {
+          this.$message.success(res.meta.msg)
+          // this.initList()
+          row.children = res.data
+        } else {
+          this.$message.error(res.meta.msg)
+        }
+      })
     },
+    // selectRole (row) {
+    //   // console.log(row)
+    //   this.currentRole = row
+    // },
     editTree (row) {
-      this.$alert('<strong>这是 <i>HTML</i> 片段</strong>', 'HTML 片段', {
-        // dangerouslyUseHTMLString: true
+      this.roleDialogFormVisible = true
+      this.currentRole = row
+      getRightList({type: 'tree'}).then(res => {
+        // console.log(res)
+        this.treeData = res.data
+      })
+      this.selectedRights.length = 0 // 每次都要先清除上次渲染的数据
+      // 在这里遍历到当前点击角色的第三个children, 取出其每个对象的id, 放到selectedRights中去
+      this.currentRole.children.forEach(first => {
+        if (first.children && first.children.length !== 0) {
+          first.children.forEach(second => {
+            if (second.children && second.children.length !== 0) {
+              second.children.forEach(third => {
+                this.selectedRights.push(third.id)
+              })
+            }
+          })
+        }
+      })
+    },
+    submitTreeData () {
+      var nodeArr = this.$refs.tree.getCheckedNodes()
+      // console.log(nodeArr)
+      var repeadIdArr = nodeArr.map(item => item.id + ',' + item.pid)
+      // console.log(repeadIdArr)
+      // 对数组以逗号分解以逗号隔开
+      var tempArr = repeadIdArr.join(',').split(',')
+      // console.log(tempArr)
+      // 对数组进行去重
+      var idArr = [...new Set(tempArr)]
+      // console.log(idArr)
+      grant({roleId: this.currentRole.id, rids: idArr.join(',')}).then(res => {
+        if (res.meta.status === 200) {
+          this.roleDialogFormVisible = false
+          this.$message.success(res.meta.msg)
+          this.initList()
+        } else {
+          this.$message.error(res.meta.msg)
+        }
       })
     }
   }

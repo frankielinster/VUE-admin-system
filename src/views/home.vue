@@ -13,17 +13,17 @@
           :router="true"
           @open="handleOpen"
           @close="handleClose">
-          <el-submenu index="1">
+          <el-submenu :index="mainItem.authName" v-for="(mainItem, index) in leftMenus" :key="index">
             <template slot="title">
               <i class="el-icon-location"></i>
-              <span>用户管理</span>
+              <span>{{mainItem.authName}}</span>
             </template>
-            <el-menu-item index="/user">
+            <el-menu-item :index="subItem.path" v-for="(subItem, index) in mainItem.children" :key="index">
               <i class="el-icon-menu"></i>
-              <span slot="title">用户列表</span>
+              <span slot="title">{{subItem.authName}}</span>
             </el-menu-item>
           </el-submenu>
-          <el-submenu index="2">
+          <!-- <el-submenu index="2">
             <template slot="title">
               <i class="el-icon-location"></i>
               <span>权限管理</span>
@@ -54,7 +54,7 @@
               <i class="el-icon-menu"></i>
               <span slot="title">商品分类</span>
             </el-menu-item>
-          </el-submenu>
+          </el-submenu> -->
         </el-menu>
       </el-aside>
 
@@ -76,12 +76,19 @@
 </template>
 
 <script>
-export {getUserList} from '@/api'
+import {getLeftMenus} from '@/api'
 export default {
   data () {
     return {
-      isCollapse: false
+      isCollapse: false,
+      leftMenus: []
     }
+  },
+  created () {
+    getLeftMenus().then(res => {
+      // console.log(res)
+      this.leftMenus = res.data
+    })
   },
   methods: {
     handleOpen (key, keyPath) {

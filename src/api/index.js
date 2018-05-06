@@ -20,6 +20,9 @@ axios.interceptors.request.use(function (config) {
   return Promise.reject(error)
 })
 
+// 左侧菜单权限
+export const getLeftMenus = () => axios.get('menus').then(res => res.data)
+
 // 定义登录请求
 // 基础写法
 // export const checkLogin = (params) => {
@@ -73,6 +76,20 @@ export const editRole = obj => axios.put(`roles/${obj.id}`, obj).then(res => res
 // 删除角色
 export const delRole = id => axios.delete(`roles/${id}`).then(res => res.data)
 
+// 删除角色权限
+export const delRoleRight = obj => axios.delete(`roles/${obj.roleId}/rights/${obj.rightId}`).then(res => res.data)
+
+// 授权角色权限
+export const grant = obj => axios.post(`roles/${obj.roleId}/rights`, {rids: obj.rids}).then(res => res.data)
+
 // productList.vue
 // 获取商品数据列表
-export const getProductCategories = obj => axios.get('goods', {params: obj}).then(res => res.data)
+export const getProductCategories = obj => axios.get('goods', { params: obj }).then(res => res.data)
+
+// productCategory.vue
+// 获取商品数据列表
+export const getCaregories = obj => axios.get('categories', { params: { type: obj.type, pagenum: obj.pagenum, pagesize: obj.pagesize } }).then(res => res.data)
+
+// orders.vue
+// 获取订单列表
+export const getOrderList = obj => axios.get('orders', {params: obj}).then(res => res.data)
