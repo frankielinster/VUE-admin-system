@@ -48,16 +48,27 @@
               @change="handleChange"
               placeholder="请选择分类"
               expand-trigger="hover"
-              :change-on-select="false"
-              :show-all-levels="false"
-              :props="selfDefineAttr"
+              :props="props"
             >
             </el-cascader>
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
           <el-button @click="addCategoryDialogFormVisible = false">取 消</el-button>
-          <el-button type="primary">确 定</el-button>
+          <el-button type="primary" @click="submitAddCate">确 定</el-button>
+        </div>
+      </el-dialog>
+
+      <!-- 编辑分类对话框 -->
+      <el-dialog title="添加分类" :visible.sync="editCategoryDialogFormVisible">
+        <el-form :model="editForm" :rules="rules" ref="edittCategoryForm">
+          <el-form-item label="分类名称" :label-width="formLabelWidth" prop="cat_name">
+            <el-input v-model="editForm.cat_name" auto-complete="off"></el-input>
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="editCategoryDialogFormVisible = false">取 消</el-button>
+          <el-button type="primary" @click="submitEditCate('edittCategoryForm')">确 定</el-button>
         </div>
       </el-dialog>
   </div>
@@ -65,7 +76,7 @@
 
 <script>
 import TreeGrid from '@/components/TreeGrid/TreeGrid'
-import {getCaregories} from '@/api'
+import {getCategories, addCategories, delCategory, getCategoryById, editCategoryName} from '@/api'
 export default {
   components: {
     TreeGrid
@@ -76,18 +87,25 @@ export default {
       currentPage: 1,
       pageSize: 10,
       totalNum: 0,
-      formLabelWidth: '120px',
+      formLabelWidth: '80px',
       options: [], // 联级选择器数据
       selectedOptions: [], // 选中的组
-      selfDefineAttr: {
+      props: {
         value: 'cat_id',
-        label: 'cat_name'
+        label: 'cat_name',
+        children: 'children'
       },
       addCategoryDialogFormVisible: false,
+      editCategoryDialogFormVisible: false,
       addForm: {
         cat_pid: '',
         cat_name: '',
         cat_level: ''
+      },
+      editForm: {
+        cat_name: '',
+        cat_id: '',
+        cat_pid: ''
       },
       dataSource: [],
       columns: [{
@@ -115,15 +133,78 @@ export default {
   },
   methods: {
     deleteCategory (cid) {
-      console.log(cid)
+      // console.log(cid)
+      delCategory(cid).then(res => {
+        console.log(res)
+        if (res.meta.status === 200) {
+          this.$message.success(res.meta.msg)
+        } else {
+          this.$message.error(res.meta.msg)
+        }
+      })
     },
     editCategory (cid) {
       console.log(cid)
+      getCategoryById(cid).then(res => {
+        console.log(res)
+        this.editForm.cat_name = res.data.cat_name
+        this.editForm.cat_id = res.data.cat_id
+        this.editForm.cat_pid = res.data.cat_pid
+        console.log(this.editForm)
+        this.editCategoryDialogFormVisible = true
+      })
+    },
+    submitEditCate (formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          editCategoryName(this.editForm).then(res => {
+            console.log(res)
+            if (res.meta.status === 200) {
+              this.editCategoryDialogFormVisible = false
+              this.$message.success(res.meta.msg)
+              this.initList()
+              // this.dataSource = res.data
+            } else {
+              this.$message.error(res.meta.msg)
+            }
+          })
+        } else {
+          this.$message.error('数据校验失败, 请检验重试')
+          return false
+        }
+      })
     },
     initList () {
-      getCaregories({type: 3, pagenum: this.currentPage, pagesize: this.pageSize}).then(res => {
+      getCategories({type: 3, pagenum: this.currentPage, pagesize: this.pageSize}).then(res => {
         // console.log(res)
         this.loading = false
+        res.data.result.forEach(item => {
+          // console.log(item)
+          if (item.cat_deleted === false) {
+            item.cat_deleted = '有效'
+          } else {
+            item.cat_deleted = '无效'
+          }
+          if (item.children && item.children.length !== 0) {
+            item.children.forEach(secondItem => {
+              if (secondItem.cat_deleted === false) {
+                secondItem.cat_deleted = '有效'
+              } else {
+                secondItem.cat_deleted = '无效'
+              }
+              // console.log(secondItem)
+              if (secondItem.children && secondItem.children.length !== 0) {
+                secondItem.children.forEach(thirdItem => {
+                  if (thirdItem.cat_deleted === false) {
+                    thirdItem.cat_deleted = '有效'
+                  } else {
+                    thirdItem.cat_deleted = '无效'
+                  }
+                })
+              }
+            })
+          }
+        })
         this.dataSource = res.data.result
         this.totalNum = res.data.total
       })
@@ -138,17 +219,36 @@ export default {
       this.currentPage = val
       this.initList()
     },
-    handleChange () {
-      console.log(123)
-      getCaregories({type: 3}).then(res => {
-        console.log(res)
-        this.options = res.data
-      })
+    handleChange (val) {
+      console.log(val)
+      this.addForm.cat_pid = val[val.length - 1]
+      this.addForm.cat_level = val.length
     },
     showAddDialog () {
-      this.addCategoryDialogFormVisible = true
-      getCaregories({type: 3}).then(res => {
+      getCategories({type: 2}).then(res => {
+        // console.log(res)
+        if (res.meta.status === 200) {
+          this.addCategoryDialogFormVisible = true
+          this.options = res.data
+        }
+      })
+    },
+    submitAddCate () {
+      console.log(this.addForm)
+      addCategories(this.addForm).then(res => {
         console.log(res)
+        // 1. 如果一个父节点都没有选中, name这个cat_pid和cat_level都是0
+        // 2. 如果选择的只有一级父节点, 也就是你要创造二级节点的话, 那么这个cat_pid就是在change事件中打印出来的数组的最后一项, 这个cat_level就是1
+        // 3. 如果选中的是二级节点, 也就是你要创造的是三级节点的话, 那么这个cat_pid就是change事件中打印出来的数组的最后一项, 这个cat_level就是2
+        if (res.meta.status === 201) {
+          this.addCategoryDialogFormVisible = false
+          this.initList()
+          this.addForm.cat_name = ''
+          this.options = []
+          this.$message.success(res.meta.msg)
+        } else {
+          this.$message.error(res.meta.msg)
+        }
       })
     }
   }

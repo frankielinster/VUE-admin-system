@@ -87,8 +87,20 @@ export const grant = obj => axios.post(`roles/${obj.roleId}/rights`, {rids: obj.
 export const getProductCategories = obj => axios.get('goods', { params: obj }).then(res => res.data)
 
 // productCategory.vue
-// 获取商品数据列表
-export const getCaregories = obj => axios.get('categories', { params: { type: obj.type, pagenum: obj.pagenum, pagesize: obj.pagesize } }).then(res => res.data)
+// 获取商品分类数据
+export const getCategories = obj => axios.get('categories', { params: { type: obj.type, pagenum: obj.pagenum, pagesize: obj.pagesize } }).then(res => res.data)
+
+// 删除商品分类
+export const delCategory = id => axios.delete(`categories/${id}`).then(res => res.data)
+
+// 编辑商品分类名称
+export const editCategoryName = obj => axios.put(`categories/${obj.cat_id}`, obj).then(res => res.data)
+
+// 根据id获取分类数据
+export const getCategoryById = id => axios.get(`categories/${id}`).then(res => res.data)
+
+// 提交添加分类功能
+export const addCategories = obj => axios.post('categories', obj).then(res => res.data)
 
 // orders.vue
 // 获取订单列表

@@ -7,6 +7,16 @@ import store from '@/store'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import '@/styles/index.scss'
+import VueQuillEditor from 'vue-quill-editor' // 引入富文本编辑器
+import ECharts from 'vue-echarts' // 引入数据图模块
+
+import 'quill/dist/quill.core.css'
+import 'quill/dist/quill.snow.css'
+import 'quill/dist/quill.bubble.css' // 引入富文本编辑器的样式
+
+Vue.use(VueQuillEditor /* { default global options } */) // 挂载富文本编辑器
+
+Vue.component('chart', ECharts) // 全局引入ECharts
 
 // 关闭生产模式下给出的提示
 Vue.config.productionTip = false

@@ -11,6 +11,7 @@ import ProductList from '@/views/products/productList.vue'
 import SortingParams from '@/views/products/sortingParams.vue'
 import AddProduct from '@/views/products/addProduct.vue'
 import Orders from '@/views/Orders/orders.vue'
+import Report from '@/views/Report/report.vue'
 
 Vue.use(Router)
 
@@ -67,6 +68,11 @@ export default new Router({
           name: 'orders',
           path: 'orders',
           component: Orders
+        },
+        {
+          name: 'report',
+          path: 'reports',
+          component: Report
         }
       ]
     }
